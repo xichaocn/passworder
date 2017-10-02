@@ -29,11 +29,15 @@ public class AESUtil extends EncryptUtil {
 
     /**
      * 加密
+     * SecureRandom 实现完全随操作系统本身的內部状态，除非调用方在调用 getInstance 方法之后又调用了 setSeed 方法；
+     * 该实现在 windows 上每次生成的 key 都相同，但是在 solaris 或部分 linux 系统上则不同。
      */
     @Override
     public byte[] encrypt(byte[] src, byte[] key) throws Exception {
         KeyGenerator kgen = KeyGenerator.getInstance(ALGORITHM);
-        kgen.init(128, new SecureRandom(key));
+        SecureRandom secureRandom = SecureRandom.getInstance("SHA1PRNG");
+        secureRandom.setSeed(key);
+        kgen.init(128, secureRandom);
         SecretKey secretKey = kgen.generateKey();
         IvParameterSpec param = new IvParameterSpec(iv);
         Cipher cipher = Cipher.getInstance(trans);// 创建密码器
@@ -47,7 +51,9 @@ public class AESUtil extends EncryptUtil {
     @Override
     public byte[] decrypt(byte[] src, byte[] key) throws Exception {
         KeyGenerator kgen = KeyGenerator.getInstance(ALGORITHM);
-        kgen.init(128, new SecureRandom(key));
+        SecureRandom secureRandom = SecureRandom.getInstance("SHA1PRNG");
+        secureRandom.setSeed(key);
+        kgen.init(128, secureRandom);
         SecretKey secretKey = kgen.generateKey();
         IvParameterSpec param = new IvParameterSpec(iv);
         Cipher cipher = Cipher.getInstance(trans);// 创建密码器
