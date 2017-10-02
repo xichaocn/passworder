@@ -39,7 +39,7 @@ public abstract class EncryptUtil {
      */
     public String encrypt(String plainTxt, String key) {
         try {
-            byte[] cipherBytes = encrypt(plainTxt.getBytes(), key.getBytes());
+            byte[] cipherBytes = encrypt(plainTxt.getBytes("UTF-8"), key.getBytes());
             return Base64Util.encode(cipherBytes);
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -58,7 +58,7 @@ public abstract class EncryptUtil {
     public String decrypt(String cipherTxt, String key) {
         try {
             byte[] cipherBytes = Base64Util.decode(cipherTxt);
-            return new String(decrypt(cipherBytes, key.getBytes()));
+            return new String(decrypt(cipherBytes, key.getBytes()), "UTF-8");
         } catch (Exception ex) {
             ex.printStackTrace();
             return null;
