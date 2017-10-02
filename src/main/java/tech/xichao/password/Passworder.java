@@ -137,7 +137,7 @@ public class Passworder {
         });
         jPanel.add(encryptBtn);
 
-        //关键词输入款
+        //关键词输入框
         JTextField keywordField = new JTextField(KEYWORD_HINT, 59);
         keywordField.addFocusListener(new FocusListener() {
             @Override
@@ -313,6 +313,7 @@ public class Passworder {
             return "加密失败，文件内容为空！";
         }
 
+        String cipherTxt = encryptUtil.encrypt(builder.toString(), getSecondPass(password));
 //        System.out.println(builder.toString());
 
         Path path = Paths.get(selectedFile.getAbsolutePath());
@@ -320,7 +321,7 @@ public class Passworder {
         try(FileOutputStream fos = new FileOutputStream(wFile);
             OutputStreamWriter osw = new OutputStreamWriter(fos, "UTF-8");
             BufferedWriter bw = new BufferedWriter(osw);) {
-            bw.write(builder.toString());
+            bw.write(cipherTxt);
             bw.flush();
         } catch (IOException e) {
             e.printStackTrace();
@@ -359,9 +360,22 @@ public class Passworder {
         try(FileInputStream fis = new FileInputStream(selectedFile);
             InputStreamReader isr = new InputStreamReader(fis, "UTF-8");
             BufferedReader br = new BufferedReader(isr);) {
-            String line = br.readLine();
-            while(line != null) {
-                //逐行解密
+            //读取所有密文
+            String cipherTxt = br.readLine();
+            if(null == cipherTxt || "".equals(cipherTxt)) {
+                return "解密失败！";
+            }
+            //第一次解密
+            cipherTxt = encryptUtil.decrypt(cipherTxt, getSecondPass(password));
+            if(null == cipherTxt || "".equals(cipherTxt)) {
+                return "解密失败！";
+            }
+            String[] lines = cipherTxt.split("\n");
+            for(String line : lines) {
+                if(null == line || "".equals(line)) {
+                    continue;
+                }
+                //第二次解密，逐行解密
                 line = decryptLine(line, password, keyword);
                 if(null == line) {
                     return "解密失败！";
@@ -369,7 +383,6 @@ public class Passworder {
                 if (!"".equals(line)) {
                     builder.append(line).append("\n");
                 }
-                line = br.readLine();
             }
         } catch (IOException ex) {
             ex.printStackTrace();
@@ -404,5 +417,12 @@ public class Passworder {
         return "";
     }
 
+    /**
+     * 获取第二次加密的密码
+     */
+    private static String getSecondPass(String password) {
+        return password + "@" + password.indexOf(5) + "^*" + password.indexOf(2)
+                + password.indexOf(6) + "%%" + password.substring(3, 7);
+    }
 
 }
