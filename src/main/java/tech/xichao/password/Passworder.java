@@ -54,6 +54,10 @@ public class Passworder {
      */
     private static final byte[] iv = {'j', '7', '*', 'c', '_', '\\', 'r', '.', '8', '(', 'Y', '1', 'g', '#', 'y', 'p'};
     /**
+     * 明文文件扩展名
+     */
+    private static final String PLAIN_FILE_EXT_NAME = ".plain";
+    /**
      * 明文分割符
      */
     private static final String PLAIN_SPLITER = "-->0-->";
@@ -295,6 +299,10 @@ public class Passworder {
         }
         if(null == selectedFile) {
             return "请选择文件！";
+        }
+        System.out.println(selectedFile.getName());
+        if(!PLAIN_FILE_EXT_NAME.equals(selectedFile.getName().substring(selectedFile.getName().lastIndexOf(".")))) {
+            return "已经是密文！";
         }
         try(FileInputStream fis = new FileInputStream(selectedFile);
             InputStreamReader isr = new InputStreamReader(fis, "UTF-8");
